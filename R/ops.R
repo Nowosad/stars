@@ -85,7 +85,7 @@ st_apply = function(X, MARGIN, FUN, ...) UseMethod("st_apply")
 #' st_apply(x, "band", mean) # equivalent to the above
 #' st_apply(x, 1:2, range) # min and max band value for each pixel
 #' @export
-st_apply.stars = function(X, MARGIN, FUN, ..., CLUSTER = NULL, PROGRESS = FALSE) {
+st_apply.stars = function(X, MARGIN, FUN, ..., CLUSTER = NULL, PROGRESS = FALSE, FUTURE = NULL) {
 	fname <- paste(deparse(substitute(FUN), 50), collapse = "\n")
 	if (is.character(MARGIN))
 		MARGIN = match(MARGIN, names(dim(X)))
@@ -98,8 +98,11 @@ st_apply.stars = function(X, MARGIN, FUN, ..., CLUSTER = NULL, PROGRESS = FALSE)
 		ret = if (PROGRESS)
 				pbapply::pbapply(y, MARGIN, FUN, ..., cl = CLUSTER)
 			else {
-				if (is.null(CLUSTER))
-					apply(y, MARGIN, FUN, ...)
+				if (is.null(CLUSTER) & is.null(FUTURE))
+				  apply(y, MARGIN, FUN, ...)
+			  else if (!is.null(FUTURE)) {
+			    future_apply(y, MARGIN, FUN, ...)
+			  }
 				else
 					parallel::parApply(CLUSTER, y, MARGIN, FUN, ...)
 			}
