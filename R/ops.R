@@ -111,7 +111,11 @@ st_apply.stars = function(X, MARGIN, FUN, ..., CLUSTER = NULL, PROGRESS = FALSE,
 		else
 			array(ret, dX)
 	}
-	ret = lapply(X, fn, ...) 
+	if (PROGRESS | !is.null(CLUSTER)){
+	  ret = lapply(X, fn, ...) 	  
+	} else {
+	  ret = future_lapply(X, fn, ...) 	  
+	}
 	dim_ret = dim(ret[[1]])
 	if (length(dim_ret) == length(MARGIN)) # FUN returned a single value
 		st_stars(ret, st_dimensions(X)[MARGIN])
